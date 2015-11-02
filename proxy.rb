@@ -12,13 +12,18 @@ UPSTREAM_URL = config['upstream_url']
 UPSTREAM_SERVICE_NAME = config['upstream_service_name']
 UPSTREAM_REGION = config['upstream_region']
 
+
+unless ENV['AWS_ACCESS_KEY_ID'].nil? || ENV['AWS_SECRET_ACCESS_KEY'].nil? || ENV['AWS_SESSION_TOKEN'].nil?
+  CREDENTIALS = Aws::Credentials.new(ENV['AWS_ACCESS_KEY_ID'],ENV['AWS_SECRET_ACCESS_KEY'],ENV['AWS_SESSION_TOKEN'])
+else
+  CREDENTIALS = Aws::InstanceProfileCredentials.new
+end
+
 app = Proc.new do |env|
     postdata = env['rack.input'].read
 
-    credentials = Aws::Credentials.new(ENV['AWS_ACCESS_KEY_ID'],ENV['AWS_SECRET_ACCESS_KEY'],ENV['AWS_SESSION_TOKEN'])
-
     client = Faraday.new(url: UPSTREAM_URL) do |faraday|
-      faraday.request(:aws_signers_v4, credentials: credentials, service_name: UPSTREAM_SERVICE_NAME, region: UPSTREAM_REGION)
+      faraday.request(:aws_signers_v4, credentials: CREDENTIALS, service_name: UPSTREAM_SERVICE_NAME, region: UPSTREAM_REGION)
       faraday.adapter(:net_http_persistent)
     end
 
