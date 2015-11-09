@@ -6,7 +6,7 @@ require 'faraday_middleware/aws_signers_v4'
 require 'net/http/persistent'
 require 'yaml'
 
-config = YAML.load_file('config.yaml')
+config = YAML.load_file(File.dirname(File.expand_path(__FILE__)) + '/config.yaml')
 
 UPSTREAM_URL = config['upstream_url']
 UPSTREAM_SERVICE_NAME = config['upstream_service_name']
